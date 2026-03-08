@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>英会話トレッドミル練習アプリ V3</title>
+<style>
+:root{--bg:#0f172a;--card:#111827;--line:#334155;--text:#f8fafc;--muted:#cbd5e1;--pri:#2563eb;--soft:#1e293b;--warn:#f59e0b;--danger:#ef4444;--ok:#22c55e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent} html,body{margin:0;background:linear-gradient(180deg,#0b1020,#111827);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{padding:14px 14px 24px}
+.wrap{max-width:1100px;margin:0 auto}
+.card{background:rgba(17,24,39,.95);border:1px solid var(--line);border-radius:22px;padding:16px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px}
+h1,h2,p{margin:0} h1{font-size:clamp(24px,4vw,34px)} h2{font-size:18px;margin-bottom:10px}
+.sub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.stat{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:12px}
+.label{font-size:12px;color:var(--muted)} .value{font-size:22px;font-weight:800;margin-top:4px}
+.controls,.btns,.row{display:grid;gap:10px} .controls{grid-template-columns:repeat(4,1fr)} .btns{grid-template-columns:repeat(5,1fr)} .row{grid-template-columns:1fr 1fr}
+.btn,input,select{width:100%;min-height:50px;border-radius:16px;border:1px solid var(--line);background:var(--soft);color:var(--text);padding:12px 14px;font-size:15px}
+.btn{font-weight:700;cursor:pointer} .btn.primary{background:var(--pri);border-color:var(--pri)} .btn.warn{background:var(--warn);color:#111827;border-color:var(--warn)} .btn.danger{background:var(--danger);border-color:var(--danger)} .btn.ok{background:var(--ok);border-color:var(--ok);color:#052e16}
+.display{margin-top:12px;min-height:340px;border-radius:26px;background:linear-gradient(180deg,#111827,#0f172a);border:1px solid #334155;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.mode{font-size:12px;padding:6px 10px;border-radius:999px;background:#1e293b;color:#cbd5e1}
+.phrase{font-size:clamp(32px,6vw,54px);font-weight:800;line-height:1.2;margin-top:14px}
+.jp{font-size:clamp(18px,3vw,22px);color:#cbd5e1;margin-top:12px}
+.linking{color:#93c5fd;margin-top:8px;font-size:14px;min-height:18px}
+.hint{color:#a5b4fc;margin-top:12px;font-size:14px}
+.touch{margin-top:14px;width:100%;padding:18px;border-radius:20px;border:1px dashed #475569;background:rgba(30,41,59,.5);color:#e2e8f0;font-weight:700}
+.list{display:grid;gap:8px;max-height:380px;overflow:auto}
+.item{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:12px}
+.item strong{display:block;word-break:break-word} .meta{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;padding:4px 8px;border-radius:999px;background:#475569} .tag.weak{background:#fde68a;color:#111827} .tag.review{background:#fecaca;color:#111827}
+.check{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px}
+.sticky{display:none}
+@media (max-width:920px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.controls,.btns,.row{grid-template-columns:repeat(2,1fr)}.sticky{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:sticky;bottom:0;margin-top:10px;padding-top:10px;background:linear-gradient(to top,#111827 70%,rgba(17,24,39,0))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>神バージョン V3</h1>
+    <p class="sub">歩行特化。画面どこでもタップで次へ。PCは Space キー。言えなかったフレーズは 3問後と10問後に自動復習します。</p>
+    <div class="stats">
+      <div class="stat"><div class="label">モード</div><div class="value" id="statMode">基本</div></div>
+      <div class="stat"><div class="label">経過</div><div class="value" id="statElapsed">00:00</div></div>
+      <div class="stat"><div class="label">復習キュー</div><div class="value" id="statReview">0</div></div>
+      <div class="stat"><div class="label">言えなかった</div><div class="value" id="statFail">0</div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="controls">
+          <select id="preset">
+            <option value="basic">基本</option>
+            <option value="hotel">ハワイホテル</option>
+            <option value="restaurant">ハワイ食事</option>
+            <option value="linking">リンキング</option>
+            <option value="e2j">瞬間英作文</option>
+          </select>
+          <select id="pace">
+            <option value="6">ゆっくり 6秒</option>
+            <option value="5" selected>通常 5秒</option>
+            <option value="4">速め 4秒</option>
+            <option value="3">集中 3秒</option>
+          </select>
+          <button class="btn" id="voiceBtn">音声 OFF</button>
+          <button class="btn" id="autoBtn">自動 OFF</button>
+        </div>
+
+        <div class="btns" style="margin-top:10px">
+          <button class="btn primary" id="startBtn">開始</button>
+          <button class="btn" id="prevBtn">戻る</button>
+          <button class="btn primary" id="nextBtn">次へ</button>
+          <button class="btn warn" id="weakBtn">苦手</button>
+          <button class="btn danger" id="failBtn">言えなかった</button>
+        </div>
+
+        <div class="display" id="touchArea">
+          <div class="mode" id="modePill">歩行モード</div>
+          <div class="phrase" id="phrase">Startを押してください</div>
+          <div class="jp" id="jp"></div>
+          <div class="linking" id="linking"></div>
+          <div class="hint" id="hint">画面どこでもタップ / PCはSpace</div>
+          <button class="touch" id="touchBtn">ここをタップして次へ</button>
+        </div>
+
+        <div class="btns" style="margin-top:10px">
+          <button class="btn" id="recommendedBtn">おすすめ順</button>
+          <button class="btn" id="reviewBtn">復習キュー</button>
+          <button class="btn ok" id="answerBtn">答え表示</button>
+          <button class="btn" id="jpBtn">日本語 ON</button>
+          <button class="btn" id="shadowBtn">シャドーイング OFF</button>
+        </div>
+
+        <div class="sticky">
+          <button class="btn primary" id="mStart">開始</button>
+          <button class="btn" id="mPrev">←</button>
+          <button class="btn primary" id="mNext">→</button>
+          <button class="btn danger" id="mFail">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>今日のメニュー</h2>
+        <div id="checklist"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>フレーズ追加</h2>
+        <div class="row">
+          <input id="newEn" placeholder="英語">
+          <input id="newJp" placeholder="日本語">
+        </div>
+        <button class="btn primary" id="addBtn" style="margin-top:10px">追加</button>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>保存済みフレーズ</h2>
+        <div class="list" id="phraseList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const presets={
+basic:[
+{en:"I see.",jp:"なるほど",link:"I-see"},
+{en:"Got it.",jp:"わかりました",link:"Got-it"},
+{en:"That makes sense.",jp:"それは納得です",link:"That-makes-sense"},
+{en:"Sounds good.",jp:"いいですね",link:"Sounds-good"},
+{en:"You know...",jp:"あのですね",link:"You-know"},
+{en:"I mean...",jp:"つまり",link:"I-mean"},
+{en:"Actually...",jp:"実は",link:"Actually"},
+{en:"The thing is...",jp:"というのは",link:"The-thing-is"},
+{en:"Let me think.",jp:"ちょっと考えさせて",link:"Let-me-think"},
+{en:"We'll see.",jp:"様子を見ましょう",link:"We'll-see"}],
+hotel:[
+{en:"What time is check-in?",jp:"チェックインは何時ですか",link:"What-time-is-check-in"},
+{en:"What time is breakfast until?",jp:"朝食は何時までですか",link:"What-time-is-breakfast-until"},
+{en:"Could you keep our luggage?",jp:"荷物を預かってもらえますか",link:"Could-you-keep-our-luggage"},
+{en:"Could you call a taxi for us?",jp:"タクシーを呼んでもらえますか",link:"Could-you-call-a-taxi-for-us"},
+{en:"Could you speak more slowly?",jp:"もう少しゆっくり話してもらえますか",link:"Could-you-speak-more-slowly"}],
+restaurant:[
+{en:"Could we have the menu, please?",jp:"メニューをお願いします",link:"Could-we-have-the-menu-please"},
+{en:"Do you have any recommendations?",jp:"おすすめはありますか",link:"Do-you-have-any-recommendations"},
+{en:"Could we have the check, please?",jp:"お会計をお願いします",link:"Could-we-have-the-check-please"},
+{en:"Can I get this to go?",jp:"これを持ち帰りにできますか",link:"Can-I-get-this-to-go"},
+{en:"Is this spicy?",jp:"これは辛いですか",link:"Is-this-spicy"}],
+linking:[
+{en:"I know, right?",jp:"ほんとそうだよね",link:"I-know-right"},
+{en:"What do you think?",jp:"どう思う？",link:"What-do-you-think"},
+{en:"I'm gonna try.",jp:"やってみるよ",link:"I'm-gonna-try"},
+{en:"Wanna go?",jp:"行きたい？",link:"Wanna-go"},
+{en:"It's up to you.",jp:"あなた次第です",link:"It's-up-to-you"}],
+e2j:[
+{en:"I see.",jp:"なるほど",link:"I-see"},
+{en:"Sounds good.",jp:"いいですね",link:"Sounds-good"},
+{en:"Let me think.",jp:"ちょっと考えさせて",link:"Let-me-think"},
+{en:"Could you say that again?",jp:"もう一度言ってもらえますか",link:"Could-you-say-that-again"},
+{en:"Could we have the check, please?",jp:"お会計をお願いします",link:"Could-we-have-the-check-please"}]
+};
+const defaults={checklist:[{id:"warmup",label:"ウォームアップを回す",done:false},{id:"fail",label:"言えなかったを1回以上押す",done:false},{id:"review",label:"復習キューを回す",done:false}]};
+const storage={get(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+const state={
+preset:storage.get("v3-preset","basic"),
+phrases:storage.get("v3-phrases",presets.basic),
+weak:storage.get("v3-weak",[]),
+reviewQueue:storage.get("v3-review",[]),
+repeatFails:storage.get("v3-repeatfails",[]),
+checklist:storage.get("v3-checklist",defaults.checklist),
+voice:storage.get("v3-voice",false),
+auto:false,
+jp:true,
+shadow:false,
+pace:storage.get("v3-pace",5),
+index:0,
+elapsed:0,
+failCount:storage.get("v3-failcount",0),
+started:false,
+recommended:false,
+reviewOnly:false,
+showAnswer:false,
+timer:null,
+autoTimer:null
+};
+const $=id=>document.getElementById(id);
+const $$=q=>document.querySelectorAll(q);
+const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+function save(){storage.set("v3-preset",state.preset);storage.set("v3-phrases",state.phrases);storage.set("v3-weak",state.weak);storage.set("v3-review",state.reviewQueue);storage.set("v3-repeatfails",state.repeatFails);storage.set("v3-checklist",state.checklist);storage.set("v3-voice",state.voice);storage.set("v3-pace",state.pace);storage.set("v3-failcount",state.failCount)}
+function activeList(){let base=state.reviewOnly?state.reviewQueue:state.phrases;if(state.recommended&&!state.reviewOnly){const weakSet=new Set(state.weak.map(x=>x.en));base=[...base.filter(x=>weakSet.has(x.en)),...base.filter(x=>!weakSet.has(x.en))]}return base.length?base:[{en:"No phrases yet.",jp:"まだフレーズがありません",link:""}]}
+function current(){const list=activeList();state.index=Math.min(state.index,Math.max(list.length-1,0));return list[state.index]}
+function speak(){if(!state.voice||!window.speechSynthesis)return;const p=current();window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(p.en);u.lang="en-US";u.rate=state.shadow?.82:.95;window.speechSynthesis.speak(u)}
+function addReview(p){if(!state.reviewQueue.some(x=>x.en===p.en))state.reviewQueue.push(p)}
+function mark(id){const item=state.checklist.find(x=>x.id===id);if(item)item.done=true}
+function render(){const p=current();$("phrase").textContent=state.preset==="e2j"&&!state.showAnswer?p.jp:p.en;$("jp").textContent=state.preset==="e2j"?(state.showAnswer?p.en:"まず英語を言ってから「答え表示」"):(state.jp?p.jp:"");$("linking").textContent=state.preset==="linking"?p.link:"";$("modePill").textContent=state.reviewOnly?"復習キュー":state.recommended?"おすすめ順":"歩行モード";$("statMode").textContent=({basic:"基本",hotel:"ホテル",restaurant:"食事",linking:"リンキング",e2j:"瞬間英作文"})[state.preset];$("statElapsed").textContent=fmt(state.elapsed);$("statReview").textContent=state.reviewQueue.length;$("statFail").textContent=state.failCount;$("voiceBtn").textContent=state.voice?"音声 ON":"音声 OFF";$("autoBtn").textContent=state.auto?"自動 ON":"自動 OFF";$("jpBtn").textContent=state.jp?"日本語 ON":"日本語 OFF";$("shadowBtn").textContent=state.shadow?"シャドーイング ON":"シャドーイング OFF";$("answerBtn").textContent=state.preset==="e2j"?"答え表示":"答え表示なし";$("hint").textContent=state.shadow?"音声のあとに追いかけて言う":"画面どこでもタップ / PCはSpace";
+$("phraseList").innerHTML="";state.phrases.forEach((x,i)=>{const div=document.createElement("div");const weak=state.weak.some(w=>w.en===x.en)?'<span class="tag weak">苦手</span>':"";const review=state.reviewQueue.some(r=>r.en===x.en)?'<span class="tag review">復習</span>':"";div.className="item";div.innerHTML=`<div><div class="meta">${i+1}</div><strong>${x.en}</strong><div class="meta">${x.jp}</div></div><div>${weak}${review}</div>`;$("phraseList").appendChild(div)});
+$("checklist").innerHTML="";state.checklist.forEach(item=>{const row=document.createElement("label");row.className="check";row.innerHTML=`<input type="checkbox" ${item.done?"checked":""}><span>${item.done?`<s>${item.label}</s>`:item.label}</span>`;row.querySelector("input").addEventListener("change",()=>{item.done=!item.done;save();render()});$("checklist").appendChild(row)});save()}
+function next(){const due=state.repeatFails.filter(x=>x.after<=0);if(due.length){const item=due.shift();state.repeatFails=state.repeatFails.filter(x=>!(x.en===item.en&&x.after<=0));addReview(item)}state.repeatFails.forEach(x=>x.after-=1);const list=activeList();state.index=(state.index+1)%list.length;if(state.elapsed>20)mark("warmup");state.showAnswer=false;render();if(state.started)speak()}
+function prev(){const list=activeList();state.index=(state.index-1+list.length)%list.length;state.showAnswer=false;render()}
+function fail(){const p=current();state.failCount+=1;if(!state.weak.some(x=>x.en===p.en))state.weak.push(p);if(!state.repeatFails.some(x=>x.en===p.en&&x.after===3))state.repeatFails.push({...p,after:3});if(!state.repeatFails.some(x=>x.en===p.en&&x.after===10))state.repeatFails.push({...p,after:10});addReview(p);mark("fail");render()}
+function stop(){clearInterval(state.timer);clearInterval(state.autoTimer);state.timer=null;state.autoTimer=null;state.started=false}
+function start(){stop();state.started=true;state.elapsed=0;state.index=0;state.showAnswer=false;state.timer=setInterval(()=>{state.elapsed+=1;render()},1000);if(state.auto)state.autoTimer=setInterval(next,Number(state.pace)*1000);render();speak()}
+function switchPreset(val){state.preset=val;state.reviewOnly=false;state.recommended=false;state.phrases=JSON.parse(JSON.stringify(presets[val]));state.index=0;state.showAnswer=false;render()}
+$("preset").addEventListener("change",e=>switchPreset(e.target.value));$("pace").addEventListener("change",e=>{state.pace=Number(e.target.value);render()});$("voiceBtn").addEventListener("click",()=>{state.voice=!state.voice;render()});$("autoBtn").addEventListener("click",()=>{state.auto=!state.auto;if(state.started)start();else render()});$("jpBtn").addEventListener("click",()=>{state.jp=!state.jp;render()});$("shadowBtn").addEventListener("click",()=>{state.shadow=!state.shadow;render()});$("startBtn").addEventListener("click",start);$("mStart").addEventListener("click",start);$("nextBtn").addEventListener("click",next);$("mNext").addEventListener("click",next);$("prevBtn").addEventListener("click",prev);$("mPrev").addEventListener("click",prev);$("weakBtn").addEventListener("click",()=>{const p=current();if(state.weak.some(x=>x.en===p.en))state.weak=state.weak.filter(x=>x.en!==p.en);else state.weak.push(p);render()});$("failBtn").addEventListener("click",fail);$("mFail").addEventListener("click",fail);$("recommendedBtn").addEventListener("click",()=>{state.recommended=true;state.reviewOnly=false;state.index=0;render()});$("reviewBtn").addEventListener("click",()=>{state.reviewOnly=true;state.recommended=false;state.index=0;mark("review");render()});$("answerBtn").addEventListener("click",()=>{if(state.preset==="e2j"){state.showAnswer=!state.showAnswer;render()}});$("touchBtn").addEventListener("click",next);$("touchArea").addEventListener("click",e=>{if(e.target.closest("button"))return;next()});document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();next()}});$("addBtn").addEventListener("click",()=>{const en=$("newEn").value.trim();const jp=$("newJp").value.trim();if(!en||!jp)return;state.phrases.push({en,jp,link:en.replaceAll(" ","-")});$("newEn").value="";$("newJp").value="";render()});
+$("preset").value=state.preset;$("pace").value=String(state.pace);render();
+</script>
+</body>
+</html>
