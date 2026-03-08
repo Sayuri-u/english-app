@@ -1,168 +1,1005 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>英会話トレッドミル練習アプリ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>英会話トレッドミル練習アプリ</title>
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --line:#e2e8f0;
+      --text:#0f172a;
+      --muted:#64748b;
+      --primary:#0f172a;
+      --soft:#f1f5f9;
+      --weak:#fef3c7;
+      --ok:#ecfdf5;
+      --info:#dbeafe;
+      --danger:#fee2e2;
+      --shadow:0 1px 2px rgba(0,0,0,.04);
+      --radius:22px;
+    }
 
-<style>
-body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-background:#f4f6f8;
-margin:0;
-padding:20px;
-text-align:center;
-}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    }
+    body{
+      padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    }
 
-.container{
-max-width:600px;
-margin:auto;
-background:white;
-padding:25px;
-border-radius:16px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:14px;
+    }
 
-.phrase{
-font-size:32px;
-font-weight:bold;
-margin:20px 0;
-}
+    .grid{
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:14px;
+    }
 
-.jp{
-font-size:18px;
-color:#555;
-}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
 
-button{
-font-size:18px;
-padding:14px 18px;
-margin:6px;
-border-radius:10px;
-border:none;
-cursor:pointer;
-}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:clamp(22px,3vw,30px);line-height:1.25}
+    h2{font-size:18px;margin-bottom:10px}
 
-.start{background:#111;color:white;}
-.next{background:#007bff;color:white;}
-.fail{background:#ff4d4f;color:white;}
-.weak{background:#ffc107;}
+    .sub{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.45;
+    }
 
-.stats{
-margin-top:15px;
-font-size:16px;
-}
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:14px;
+    }
 
-</style>
+    .stat{
+      background:var(--soft);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .label{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .value{
+      font-size:clamp(18px,2.5vw,22px);
+      font-weight:800;
+      margin-top:4px;
+    }
+
+    .row,.controls,.btns{
+      display:grid;
+      gap:10px;
+    }
+
+    .row.two{
+      grid-template-columns:1fr 1fr;
+    }
+
+    .controls.six{
+      grid-template-columns:repeat(6,1fr);
+    }
+
+    .btns.five{
+      grid-template-columns:repeat(5,1fr);
+    }
+
+    .btn,input,select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      padding:14px 14px;
+      font-size:15px;
+      min-height:50px;
+      color:var(--text);
+    }
+
+    input,select{outline:none}
+
+    .btn{
+      cursor:pointer;
+      font-weight:700;
+      touch-action:manipulation;
+    }
+
+    .btn:active{transform:scale(.995)}
+    .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .btn.soft{background:var(--soft)}
+    .btn.warn{background:var(--weak)}
+    .btn.info{background:var(--info)}
+    .btn.danger{background:var(--danger)}
+
+    .display{
+      background:var(--primary);
+      color:#fff;
+      border-radius:28px;
+      padding:26px 18px;
+      min-height:320px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      margin-top:12px;
+    }
+
+    .caps{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#94a3b8;
+    }
+
+    .phrase{
+      font-size:clamp(28px,5vw,42px);
+      font-weight:800;
+      line-height:1.25;
+      margin-top:12px;
+      word-break:break-word;
+    }
+
+    .jp{
+      font-size:clamp(16px,3vw,19px);
+      color:#cbd5e1;
+      margin-top:10px;
+      line-height:1.5;
+    }
+
+    .hint{
+      font-size:14px;
+      color:#cbd5e1;
+      margin-top:10px;
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      color:#e2e8f0;
+      font-size:12px;
+      margin-top:8px;
+    }
+
+    .progress{
+      height:10px;
+      background:var(--soft);
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:12px;
+    }
+
+    .bar{
+      height:100%;
+      width:0;
+      background:var(--primary);
+      transition:width .2s;
+    }
+
+    .bar.alt{
+      background:#64748b;
+    }
+
+    .section-gap{
+      margin-top:14px;
+    }
+
+    .list{
+      max-height:360px;
+      overflow:auto;
+      display:grid;
+      gap:8px;
+    }
+
+    .item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .item-text{
+      min-width:0;
+    }
+
+    .item-text strong{
+      display:block;
+      word-break:break-word;
+    }
+
+    .tag{
+      font-size:12px;
+      background:var(--weak);
+      padding:4px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .tag.red{
+      background:var(--danger);
+    }
+
+    .check{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin-bottom:8px;
+    }
+
+    .check.done{
+      background:var(--ok);
+    }
+
+    .check input{
+      margin-top:2px;
+    }
+
+    .sticky-mobile{
+      display:none;
+    }
+
+    @media (max-width:980px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .row.two{grid-template-columns:1fr}
+      .controls.six{grid-template-columns:repeat(2,1fr)}
+      .btns.five{grid-template-columns:repeat(2,1fr)}
+      .wrap{padding:12px}
+      .card{padding:14px}
+      .list{max-height:none}
+      .sticky-mobile{
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        gap:8px;
+        position:sticky;
+        bottom:0;
+        padding-top:10px;
+        background:linear-gradient(to top,var(--bg) 70%,rgba(248,250,252,0));
+        margin-top:10px;
+      }
+      .sticky-mobile .btn{
+        min-height:54px;
+        font-size:14px;
+      }
+    }
+
+    @media (max-width:560px){
+      .stats,.controls.six,.btns.five{grid-template-columns:1fr 1fr}
+      .phrase{font-size:30px}
+      .display{min-height:260px;padding:22px 14px}
+      .sticky-mobile{grid-template-columns:repeat(5,1fr)}
+      .desktop-only{display:none}
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="card">
+      <h1>英会話トレッドミル練習アプリ</h1>
+      <p class="sub">日本語表示・自動再生・苦手集中・今日のおすすめ順・フレーズ追加・保存・言えなかった・復習キュー・シャドーイング対応</p>
+      <div class="stats">
+        <div class="stat"><div class="label">メニュー</div><div class="value" id="statMenu">20分</div></div>
+        <div class="stat"><div class="label">経過</div><div class="value" id="statElapsed">00:00</div></div>
+        <div class="stat"><div class="label">残り</div><div class="value" id="statRemain">20:00</div></div>
+        <div class="stat"><div class="label">反復数</div><div class="value" id="statReps">0</div></div>
+      </div>
+    </div>
 
-<div class="container">
+    <div class="grid section-gap">
+      <div>
+        <div class="card">
+          <div class="row two">
+            <div>
+              <h2>プリセット</h2>
+              <div class="btns" style="grid-template-columns:repeat(4,1fr)">
+                <button class="btn active" id="preset-treadmill">基本</button>
+                <button class="btn" id="preset-hawaii-hotel">ホテル</button>
+                <button class="btn" id="preset-hawaii-restaurant">食事</button>
+                <button class="btn" id="preset-linking">リンキング</button>
+              </div>
+            </div>
+            <div>
+              <h2>セッション</h2>
+              <div class="btns" style="grid-template-columns:repeat(3,1fr)">
+                <button class="btn" data-menu="10">10分</button>
+                <button class="btn active" data-menu="20">20分</button>
+                <button class="btn" data-menu="30">30分</button>
+              </div>
+            </div>
+          </div>
 
-<h1>英会話トレッドミル練習</h1>
+          <div class="controls six section-gap">
+            <select id="repeatCount">
+              <option value="1">1回反復</option>
+              <option value="3" selected>3回反復</option>
+              <option value="5">5回反復</option>
+              <option value="10">10回反復</option>
+            </select>
 
-<div class="phrase" id="phrase">Startを押してください</div>
-<div class="jp" id="jp"></div>
+            <select id="paceMode">
+              <option value="easy">ゆっくり</option>
+              <option value="walk" selected>通常</option>
+              <option value="brisk">速め</option>
+              <option value="challenge">集中</option>
+            </select>
 
-<div>
-<button class="start" onclick="start()">開始</button>
-<button class="next" onclick="next()">次へ</button>
-<button class="fail" onclick="fail()">言えなかった</button>
-<button class="weak" onclick="weak()">苦手</button>
-</div>
+            <button class="btn" id="toggleVoice">音声 OFF</button>
+            <button class="btn" id="toggleAutoplay">自動再生 OFF</button>
+            <button class="btn info" id="toggleJP">日本語表示 ON</button>
+            <button class="btn info" id="toggleShadow">シャドーイング OFF</button>
+          </div>
 
-<div class="stats">
-<p>反復: <span id="count">0</span></p>
-<p>苦手: <span id="weakCount">0</span></p>
-<p>言えなかった: <span id="failCount">0</span></p>
-</div>
+          <div class="btns five section-gap desktop-only">
+            <button class="btn primary" id="startBtn">開始</button>
+            <button class="btn" id="resetBtn">リセット</button>
+            <button class="btn" id="prevBtn">← 戻る</button>
+            <button class="btn primary" id="nextBtn">次へ →</button>
+            <button class="btn" id="speakBtn">読み上げ</button>
+          </div>
 
-</div>
+          <div class="progress"><div class="bar" id="sessionBar"></div></div>
+          <div class="progress"><div class="bar alt" id="phraseBar"></div></div>
+          <div class="section-gap small" id="modeLabel">通常順</div>
 
-<script>
+          <div class="display">
+            <div class="caps">Current phrase</div>
+            <div class="phrase" id="phraseText">I see.</div>
+            <div class="jp" id="jpText">なるほど</div>
+            <div class="hint" id="repeatLabel">Repeat 1 / 3</div>
+            <div class="hint" id="speedLabel">通常ペース / 5秒ごと</div>
+            <div class="pill" id="extraHint">歩きながら、口パクでもOK</div>
+          </div>
 
-const phrases = [
+          <div class="btns" style="grid-template-columns:repeat(4,1fr);margin-top:14px">
+            <button class="btn warn" id="toggleWeakBtn">☆ 苦手</button>
+            <button class="btn danger" id="failBtn">言えなかった</button>
+            <button class="btn soft" id="normalModeBtn">全フレーズ</button>
+            <button class="btn soft" id="weakModeBtn">苦手だけ</button>
+          </div>
 
-{en:"I see.",jp:"なるほど"},
-{en:"Got it.",jp:"わかりました"},
-{en:"That makes sense.",jp:"それは納得です"},
-{en:"Sounds good.",jp:"いいですね"},
-{en:"You know...",jp:"あのですね"},
-{en:"I mean...",jp:"つまり"},
-{en:"Actually...",jp:"実は"},
-{en:"The thing is...",jp:"というのは"},
-{en:"Let me think.",jp:"ちょっと考えさせて"},
-{en:"We'll see.",jp:"様子を見ましょう"},
-{en:"It depends.",jp:"場合によります"},
-{en:"Not really.",jp:"あまりそうでもない"},
-{en:"Of course.",jp:"もちろん"},
-{en:"No problem.",jp:"問題ありません"},
-{en:"Why not?",jp:"いいじゃない？"},
-{en:"Fair enough.",jp:"それも一理あります"},
-{en:"Good point.",jp:"いいポイントですね"},
-{en:"You're right.",jp:"あなたの言う通り"},
-{en:"That's true.",jp:"確かに"},
-{en:"Just a second.",jp:"ちょっと待って"}
+          <div class="btns" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+            <button class="btn" id="recommendedBtn">今日のおすすめ順</button>
+            <button class="btn" id="reviewQueueBtn">復習キュー</button>
+          </div>
 
-]
+          <div class="sticky-mobile">
+            <button class="btn primary" id="startBtn2">開始</button>
+            <button class="btn" id="prevBtn2">←</button>
+            <button class="btn primary" id="nextBtn2">→</button>
+            <button class="btn" id="speakBtn2">音</button>
+            <button class="btn danger" id="failBtn2">×</button>
+          </div>
+        </div>
+      </div>
 
-let index=0
-let count=0
-let weakList=[]
-let failCount=0
+      <div>
+        <div class="card">
+          <h2>今日のメニュー</h2>
+          <div id="checklist"></div>
+          <button class="btn section-gap" id="resetChecklistBtn">チェックをリセット</button>
+        </div>
 
-function show(){
+        <div class="card section-gap">
+          <h2>今日の記録</h2>
+          <div class="stats" style="margin-top:0">
+            <div class="stat"><div class="label">苦手登録</div><div class="value" id="weakCount">0</div></div>
+            <div class="stat"><div class="label">言えなかった</div><div class="value" id="failCount">0</div></div>
+            <div class="stat"><div class="label">復習キュー</div><div class="value" id="reviewCount">0</div></div>
+            <div class="stat"><div class="label">今日の達成</div><div class="value" id="doneCount">0</div></div>
+          </div>
+        </div>
 
-document.getElementById("phrase").innerText=phrases[index].en
-document.getElementById("jp").innerText=phrases[index].jp
+        <div class="card section-gap">
+          <h2>フレーズ追加</h2>
+          <div class="row two">
+            <input id="newPhraseEn" placeholder="英語 例: I'm not sure." />
+            <input id="newPhraseJp" placeholder="日本語 例: よくわかりません" />
+          </div>
+          <button class="btn primary section-gap" id="addPhraseBtn">追加</button>
+          <p class="sub">英語と日本語をセットで追加できます。</p>
+        </div>
 
-}
+        <div class="card section-gap">
+          <h2>保存済みフレーズ</h2>
+          <div class="small" id="phraseCount"></div>
+          <div class="list section-gap" id="phraseList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-function start(){
+  <script>
+    const presetData = {
+      treadmill: [
+        {en:"I see.",jp:"なるほど"},
+        {en:"Got it.",jp:"わかりました"},
+        {en:"That makes sense.",jp:"それは納得です"},
+        {en:"Sounds good.",jp:"いいですね"},
+        {en:"You know...",jp:"あのですね"},
+        {en:"I mean...",jp:"つまり"},
+        {en:"Actually...",jp:"実は"},
+        {en:"The thing is...",jp:"というのは"},
+        {en:"Let me think.",jp:"ちょっと考えさせて"},
+        {en:"We'll see.",jp:"様子を見ましょう"},
+        {en:"It depends.",jp:"場合によります"},
+        {en:"Not really.",jp:"あまりそうでもない"},
+        {en:"Of course.",jp:"もちろん"},
+        {en:"No problem.",jp:"問題ありません"},
+        {en:"Why not?",jp:"いいじゃない？"},
+        {en:"Fair enough.",jp:"それも一理あります"},
+        {en:"Good point.",jp:"いいポイントですね"},
+        {en:"You're right.",jp:"あなたの言う通り"},
+        {en:"That's true.",jp:"確かに"},
+        {en:"Just a second.",jp:"ちょっと待って"}
+      ],
+      hawaiiHotel: [
+        {en:"What time is check-in?",jp:"チェックインは何時ですか"},
+        {en:"What time is breakfast until?",jp:"朝食は何時までですか"},
+        {en:"Could you call a taxi for us?",jp:"タクシーを呼んでもらえますか"},
+        {en:"Could we get more towels?",jp:"タオルをもう少しいただけますか"},
+        {en:"Is there a shuttle bus?",jp:"シャトルバスはありますか"},
+        {en:"Could you keep our luggage?",jp:"荷物を預かってもらえますか"},
+        {en:"The air conditioner isn't working.",jp:"エアコンが動いていません"},
+        {en:"Do you have a late check-out option?",jp:"レイトチェックアウトはできますか"},
+        {en:"Could you speak more slowly?",jp:"もう少しゆっくり話してもらえますか"},
+        {en:"I didn't catch that.",jp:"聞き取れませんでした"}
+      ],
+      hawaiiRestaurant: [
+        {en:"Could we have the menu, please?",jp:"メニューをお願いします"},
+        {en:"Do you have any recommendations?",jp:"おすすめはありますか"},
+        {en:"Could we have the check, please?",jp:"お会計をお願いします"},
+        {en:"Can I get this to go?",jp:"これを持ち帰りにできますか"},
+        {en:"Could I have some water, please?",jp:"お水をいただけますか"},
+        {en:"What comes with this?",jp:"これには何が付きますか"},
+        {en:"Is this spicy?",jp:"これは辛いですか"},
+        {en:"We're good, thank you.",jp:"大丈夫です、ありがとうございます"},
+        {en:"That sounds good.",jp:"よさそうですね"},
+        {en:"Could you take a picture for us?",jp:"写真を撮っていただけますか"}
+      ],
+      linking: [
+        {en:"I know, right?",jp:"ほんとそうだよね"},
+        {en:"What do you think?",jp:"どう思う？"},
+        {en:"A lot of it.",jp:"その多く"},
+        {en:"I'm gonna try.",jp:"やってみるよ"},
+        {en:"Wanna go?",jp:"行きたい？"},
+        {en:"Kind of.",jp:"まあそんな感じ"},
+        {en:"Sort of.",jp:"ちょっとそんな感じ"},
+        {en:"I guess so.",jp:"たぶんそうかな"},
+        {en:"That works.",jp:"それで大丈夫"},
+        {en:"Sounds great.",jp:"すごくよさそう"},
+        {en:"I'll check it out.",jp:"見てみるよ"},
+        {en:"I'm not sure.",jp:"よくわかりません"},
+        {en:"Let's do it.",jp:"やろう"},
+        {en:"How about this?",jp:"これはどう？"},
+        {en:"It's up to you.",jp:"あなた次第です"}
+      ]
+    };
 
-index=0
-count=0
-show()
+    const defaultChecklist = [
+      { id:'warmup', label:'最初の10分：全フレーズを3回ずつ', done:false },
+      { id:'autoplay', label:'自動再生でテンポ反復', done:false },
+      { id:'fail', label:'言えなかったフレーズを最低1つ記録', done:false },
+      { id:'review', label:'最後に復習キューを回す', done:false }
+    ];
 
-}
+    const storage = {
+      get(key, fallback){
+        try {
+          return JSON.parse(localStorage.getItem(key)) ?? fallback;
+        } catch {
+          return fallback;
+        }
+      },
+      set(key, value){
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    };
 
-function next(){
+    const paceMap = { easy:6, walk:5, brisk:4, challenge:3 };
+    const paceLabel = { easy:'ゆっくり', walk:'通常', brisk:'速め', challenge:'集中' };
 
-index++
-count++
+    const state = {
+      preset: storage.get('full-preset','treadmill'),
+      phrases: storage.get('full-phrases', presetData.treadmill),
+      weak: storage.get('full-weak', []),
+      checklist: storage.get('full-checklist', defaultChecklist),
+      repeatCount: storage.get('full-repeat', 3),
+      paceMode: storage.get('full-pace', 'walk'),
+      voice: storage.get('full-voice', false),
+      showJP: storage.get('full-showjp', true),
+      shadowing: storage.get('full-shadowing', false),
+      menu: storage.get('full-menu', 20),
+      recommended: false,
+      weakOnly: false,
+      reviewOnly: false,
+      reviewQueue: storage.get('full-reviewqueue', []),
+      currentIndex: 0,
+      currentRep: 1,
+      autoplay: false,
+      started: false,
+      elapsed: 0,
+      completedReps: 0,
+      failHits: storage.get('full-failhits', 0),
+      timer: null,
+      autoplayTimer: null
+    };
 
-if(index>=phrases.length){
-index=0
-}
+    const $ = id => document.getElementById(id);
+    const $$ = sel => document.querySelectorAll(sel);
+    const formatTime = sec => `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
 
-document.getElementById("count").innerText=count
+    function saveState(){
+      storage.set('full-preset', state.preset);
+      storage.set('full-phrases', state.phrases);
+      storage.set('full-weak', state.weak);
+      storage.set('full-checklist', state.checklist);
+      storage.set('full-repeat', state.repeatCount);
+      storage.set('full-pace', state.paceMode);
+      storage.set('full-voice', state.voice);
+      storage.set('full-showjp', state.showJP);
+      storage.set('full-shadowing', state.shadowing);
+      storage.set('full-menu', state.menu);
+      storage.set('full-reviewqueue', state.reviewQueue);
+      storage.set('full-failhits', state.failHits);
+    }
 
-show()
+    function activePhrases(){
+      if(state.reviewOnly){
+        return state.reviewQueue.length
+          ? state.reviewQueue
+          : [{en:'No review queue yet.', jp:'まだ復習キューがありません'}];
+      }
+      if(state.weakOnly){
+        return state.weak.length
+          ? state.weak
+          : [{en:'No weak phrases yet.', jp:'まだ苦手フレーズがありません'}];
+      }
+      if(!state.recommended){
+        return state.phrases.length
+          ? state.phrases
+          : [{en:'No phrases yet.', jp:'まだフレーズがありません'}];
+      }
 
-}
+      const weakEn = new Set(state.weak.map(x => x.en));
+      const weakFirst = state.phrases.filter(p => weakEn.has(p.en));
+      const others = state.phrases.filter(p => !weakEn.has(p.en));
+      const short = others.filter(p => p.en.length <= 14);
+      const mid = others.filter(p => p.en.length > 14 && p.en.length <= 26);
+      const long = others.filter(p => p.en.length > 26);
+      const combined = [...weakFirst, ...short, ...mid, ...long];
 
-function weak(){
+      return combined.length
+        ? combined
+        : [{en:'No phrases yet.', jp:'まだフレーズがありません'}];
+    }
 
-const p=phrases[index].en
+    function currentPhrase(){
+      const list = activePhrases();
+      state.currentIndex = Math.min(state.currentIndex, Math.max(list.length - 1, 0));
+      return list[state.currentIndex];
+    }
 
-if(!weakList.includes(p)){
-weakList.push(p)
-}
+    function speakCurrent(){
+      if(!state.voice || !window.speechSynthesis) return;
+      const phrase = currentPhrase();
+      if(phrase.en.startsWith('No ')) return;
 
-document.getElementById("weakCount").innerText=weakList.length
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(phrase.en);
+      u.lang = 'en-US';
+      u.rate = state.shadowing ? 0.82 : 0.95;
+      window.speechSynthesis.speak(u);
+    }
 
-}
+    function addToReviewQueue(phrase){
+      if(!state.reviewQueue.some(x => x.en === phrase.en)){
+        state.reviewQueue.push(phrase);
+      }
+    }
 
-function fail(){
+    function markChecklist(id){
+      const item = state.checklist.find(x => x.id === id);
+      if(item) item.done = true;
+    }
 
-failCount++
+    function updateUI(){
+      const list = activePhrases();
+      const phrase = currentPhrase();
+      const doneCount = state.checklist.filter(x => x.done).length;
 
-document.getElementById("failCount").innerText=failCount
+      $('phraseText').textContent = phrase.en;
+      $('jpText').textContent = state.showJP ? phrase.jp : '';
+      $('repeatLabel').textContent = `Repeat ${state.currentRep} / ${state.repeatCount}`;
+      $('speedLabel').textContent = `${paceLabel[state.paceMode]}ペース / ${paceMap[state.paceMode]}秒ごと`;
+      $('modeLabel').textContent = state.reviewOnly ? '復習キュー' : state.weakOnly ? '苦手だけ' : (state.recommended ? '今日のおすすめ順' : '通常順');
+      $('statMenu').textContent = `${state.menu}分`;
+      $('statElapsed').textContent = formatTime(state.elapsed);
+      $('statRemain').textContent = formatTime(Math.max(state.menu*60 - state.elapsed, 0));
+      $('statReps').textContent = String(state.completedReps);
+      $('sessionBar').style.width = `${Math.min((state.elapsed/(state.menu*60))*100,100)}%`;
+      $('phraseBar').style.width = `${((state.currentIndex+1)/list.length)*100}%`;
+      $('toggleVoice').textContent = state.voice ? '音声 ON' : '音声 OFF';
+      $('toggleAutoplay').textContent = state.autoplay ? '自動再生 ON' : '自動再生 OFF';
+      $('toggleJP').textContent = state.showJP ? '日本語表示 ON' : '日本語表示 OFF';
+      $('toggleShadow').textContent = state.shadowing ? 'シャドーイング ON' : 'シャドーイング OFF';
+      $('toggleWeakBtn').textContent = state.weak.some(x => x.en === phrase.en) ? '★ 苦手' : '☆ 苦手';
+      $('phraseCount').textContent = `${state.phrases.length} items`;
+      $('weakCount').textContent = String(state.weak.length);
+      $('failCount').textContent = String(state.failHits);
+      $('reviewCount').textContent = String(state.reviewQueue.length);
+      $('doneCount').textContent = String(doneCount);
+      $('extraHint').textContent = state.shadowing ? '音声のあとに追いかけて言う' : '歩きながら、口パクでもOK';
 
-}
+      $$('[data-menu]').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.menu) === state.menu));
 
-</script>
+      ['treadmill','hawaii-hotel','hawaii-restaurant','linking'].forEach(key => {
+        const el = $(`preset-${key}`);
+        if(el) el.classList.toggle('active', state.preset === key);
+      });
 
+      renderChecklist();
+      renderList();
+      saveState();
+    }
+
+    function renderChecklist(){
+      $('checklist').innerHTML = '';
+      state.checklist.forEach(item => {
+        const el = document.createElement('label');
+        el.className = `check ${item.done ? 'done' : ''}`;
+        el.innerHTML = `<input type="checkbox" ${item.done ? 'checked' : ''}><span>${item.done ? '<s>'+item.label+'</s>' : item.label}</span>`;
+        el.querySelector('input').addEventListener('change', () => {
+          item.done = !item.done;
+          updateUI();
+        });
+        $('checklist').appendChild(el);
+      });
+    }
+
+    function renderList(){
+      $('phraseList').innerHTML = '';
+      state.phrases.forEach((p, idx) => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `<div class="item-text"><div class="small">${idx+1}</div><strong>${p.en}</strong><div class="small">${p.jp}</div></div><div style="display:flex;gap:8px;align-items:center"></div>`;
+        const right = item.lastElementChild;
+
+        if(state.weak.some(x => x.en === p.en)){
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.textContent = '苦手';
+          right.appendChild(tag);
+        }
+
+        if(state.reviewQueue.some(x => x.en === p.en)){
+          const tag2 = document.createElement('span');
+          tag2.className = 'tag red';
+          tag2.textContent = '復習';
+          right.appendChild(tag2);
+        }
+
+        const del = document.createElement('button');
+        del.className = 'btn';
+        del.style.width = 'auto';
+        del.textContent = '削除';
+        del.addEventListener('click', () => {
+          state.phrases = state.phrases.filter(x => x.en !== p.en);
+          state.weak = state.weak.filter(x => x.en !== p.en);
+          state.reviewQueue = state.reviewQueue.filter(x => x.en !== p.en);
+          state.currentIndex = 0;
+          state.currentRep = 1;
+          updateUI();
+        });
+        right.appendChild(del);
+
+        $('phraseList').appendChild(item);
+      });
+    }
+
+    function nextPhrase(){
+      const phrase = currentPhrase();
+      if(phrase.en.startsWith('No ')) return;
+
+      state.completedReps += 1;
+
+      if(state.currentRep < state.repeatCount){
+        state.currentRep += 1;
+      } else {
+        state.currentRep = 1;
+        state.currentIndex = (state.currentIndex + 1) % activePhrases().length;
+      }
+
+      if(state.completedReps > 5) markChecklist('warmup');
+
+      updateUI();
+      if(state.started) speakCurrent();
+    }
+
+    function prevPhrase(){
+      const phrase = currentPhrase();
+      if(phrase.en.startsWith('No ')) return;
+
+      if(state.currentRep > 1){
+        state.currentRep -= 1;
+      } else {
+        state.currentIndex = (state.currentIndex - 1 + activePhrases().length) % activePhrases().length;
+        state.currentRep = state.repeatCount;
+      }
+
+      updateUI();
+    }
+
+    function failPhrase(){
+      const p = currentPhrase();
+      if(p.en.startsWith('No ')) return;
+
+      state.failHits += 1;
+
+      if(!state.weak.some(x => x.en === p.en)){
+        state.weak.push(p);
+      }
+
+      addToReviewQueue(p);
+      markChecklist('fail');
+      updateUI();
+    }
+
+    function resetSession(){
+      state.started = false;
+      state.autoplay = false;
+      state.elapsed = 0;
+      state.completedReps = 0;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+
+      clearInterval(state.timer);
+      clearInterval(state.autoplayTimer);
+
+      if(window.speechSynthesis) window.speechSynthesis.cancel();
+      updateUI();
+    }
+
+    function startSession(){
+      resetSession();
+      state.started = true;
+
+      state.timer = setInterval(() => {
+        state.elapsed += 1;
+        if(state.elapsed >= state.menu * 60){
+          resetSession();
+        } else {
+          updateUI();
+        }
+      }, 1000);
+
+      updateUI();
+      speakCurrent();
+    }
+
+    function restartAutoplayIfNeeded(){
+      clearInterval(state.autoplayTimer);
+      if(!state.autoplay || !state.started) return;
+
+      state.autoplayTimer = setInterval(() => {
+        nextPhrase();
+        if(state.autoplay) markChecklist('autoplay');
+      }, paceMap[state.paceMode] * 1000);
+    }
+
+    function bindClick(id, fn){
+      const el = document.getElementById(id);
+      if(el) el.addEventListener('click', fn);
+    }
+
+    bindClick('startBtn', () => { startSession(); restartAutoplayIfNeeded(); });
+    bindClick('startBtn2', () => { startSession(); restartAutoplayIfNeeded(); });
+    bindClick('resetBtn', resetSession);
+    bindClick('prevBtn', prevPhrase);
+    bindClick('prevBtn2', prevPhrase);
+    bindClick('nextBtn', nextPhrase);
+    bindClick('nextBtn2', nextPhrase);
+    bindClick('speakBtn', speakCurrent);
+    bindClick('speakBtn2', speakCurrent);
+    bindClick('failBtn', failPhrase);
+    bindClick('failBtn2', failPhrase);
+
+    bindClick('toggleVoice', () => {
+      state.voice = !state.voice;
+      updateUI();
+    });
+
+    bindClick('toggleAutoplay', () => {
+      state.autoplay = !state.autoplay;
+      restartAutoplayIfNeeded();
+      updateUI();
+    });
+
+    bindClick('toggleJP', () => {
+      state.showJP = !state.showJP;
+      updateUI();
+    });
+
+    bindClick('toggleShadow', () => {
+      state.shadowing = !state.shadowing;
+      updateUI();
+    });
+
+    bindClick('recommendedBtn', () => {
+      state.recommended = true;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('reviewQueueBtn', () => {
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = true;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      markChecklist('review');
+      updateUI();
+    });
+
+    bindClick('normalModeBtn', () => {
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('weakModeBtn', () => {
+      state.recommended = false;
+      state.weakOnly = true;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('toggleWeakBtn', () => {
+      const p = currentPhrase();
+      if(p.en.startsWith('No ')) return;
+
+      if(state.weak.some(x => x.en === p.en)){
+        state.weak = state.weak.filter(x => x.en !== p.en);
+      } else {
+        state.weak.push(p);
+      }
+      updateUI();
+    });
+
+    document.getElementById('repeatCount').addEventListener('change', e => {
+      state.repeatCount = Number(e.target.value);
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    document.getElementById('paceMode').addEventListener('change', e => {
+      state.paceMode = e.target.value;
+      restartAutoplayIfNeeded();
+      updateUI();
+    });
+
+    document.querySelectorAll('[data-menu]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.menu = Number(btn.dataset.menu);
+        updateUI();
+      });
+    });
+
+    bindClick('preset-treadmill', () => {
+      state.preset = 'treadmill';
+      state.phrases = JSON.parse(JSON.stringify(presetData.treadmill));
+      state.weak = [];
+      state.reviewQueue = [];
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('preset-hawaii-hotel', () => {
+      state.preset = 'hawaii-hotel';
+      state.phrases = JSON.parse(JSON.stringify(presetData.hawaiiHotel));
+      state.weak = [];
+      state.reviewQueue = [];
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('preset-hawaii-restaurant', () => {
+      state.preset = 'hawaii-restaurant';
+      state.phrases = JSON.parse(JSON.stringify(presetData.hawaiiRestaurant));
+      state.weak = [];
+      state.reviewQueue = [];
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('preset-linking', () => {
+      state.preset = 'linking';
+      state.phrases = JSON.parse(JSON.stringify(presetData.linking));
+      state.weak = [];
+      state.reviewQueue = [];
+      state.recommended = false;
+      state.weakOnly = false;
+      state.reviewOnly = false;
+      state.currentIndex = 0;
+      state.currentRep = 1;
+      updateUI();
+    });
+
+    bindClick('addPhraseBtn', () => {
+      const en = document.getElementById('newPhraseEn').value.trim();
+      const jp = document.getElementById('newPhraseJp').value.trim();
+      if(!en || !jp) return;
+
+      if(!state.phrases.some(x => x.en === en)){
+        state.phrases.push({en, jp});
+      }
+
+      document.getElementById('newPhraseEn').value = '';
+      document.getElementById('newPhraseJp').value = '';
+      updateUI();
+    });
+
+    bindClick('resetChecklistBtn', () => {
+      state.checklist = JSON.parse(JSON.stringify(defaultChecklist));
+      updateUI();
+    });
+
+    updateUI();
+  </script>
 </body>
 </html>
